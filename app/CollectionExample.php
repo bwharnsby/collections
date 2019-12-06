@@ -16,24 +16,27 @@ class CollectionExample
 //        return $schedule;
 
         $home_team_games = [
-            ['score' => [0,1], 'date' => "2019-08-10"],
-            ['score' => [1,0], 'date' => "2019-08-16"],
-            ['score' => [3,0], 'date' => "2019-08-23"],
-            ['score' => [3,1], 'date' => "2019-09-09"],
-            ['score' => [1,0], 'date' => "2019-09-15"],
-            ['score' => [2,2], 'date' => "2019-09-23"],
-            ['score' => [1,0], 'date' => "2019-09-30"],
-            ['score' => [0,3], 'date' => "2019-10-05"],
+            ['score' => [1,0], 'date' => "2019-08-03"],
+            ['score' => [1,0], 'date' => "2019-08-17"],
+            ['score' => [1,1], 'date' => "2019-08-31"],
+            ['score' => [1,2], 'date' => "2019-09-21"],
+            ['score' => [2,1], 'date' => "2019-10-05"],
+            ['score' => [2,2], 'date' => "2019-10-22"],
+            ['score' => [2,0], 'date' => "2019-10-26"],
+            ['score' => [2,1], 'date' => "2019-11-09"],
+            ['score' => [2,2], 'date' => "2019-11-26"],
         ];
         $away_team_games = [
-            ['score' => [2,1], 'date' => "2019-08-09"],
-            ['score' => [1,1], 'date' => "2019-08-15"],
-            ['score' => [1,0], 'date' => "2019-08-21"],
-            ['score' => [2,3], 'date' => "2019-09-07"],
-            ['score' => [1,4], 'date' => "2019-09-16"],
-            ['score' => [0,1], 'date' => "2019-09-22"],
-            ['score' => [1,1], 'date' => "2019-09-30"],
-            ['score' => [0,2], 'date' => "2019-10-05"],
+            ['score' => [1,1], 'date' => "2019-08-10"],
+            ['score' => [1,1], 'date' => "2019-08-21"],
+            ['score' => [1,2], 'date' => "2019-08-24"],
+            ['score' => [0,1], 'date' => "2019-09-14"],
+            ['score' => [2,3], 'date' => "2019-09-27"],
+            ['score' => [1,1], 'date' => "2019-10-01"],
+            ['score' => [1,0], 'date' => "2019-10-20"],
+            ['score' => [1,2], 'date' => "2019-11-02"],
+            ['score' => [0,0], 'date' => "2019-11-23"],
+            ['score' => [0,4], 'date' => "2019-11-27"],
         ];
         $arr = [
             'hs' => [],
@@ -42,7 +45,7 @@ class CollectionExample
             'ac' => []
         ];
 
-        $date_of_fixture = "2019-10-11";
+        $date_of_fixture = "2019-12-06";
 
         for($i = 0; $i < count($home_team_games); $i++) {
             //distance from fixture date to first game date
@@ -71,7 +74,8 @@ class CollectionExample
             'a_score' => $a_score,
             'avg' => 0,
             'h_games' => 0,
-            'a_games' => 0
+            'a_games' => 0,
+            'stats' => $this->generateStats($home_team_games, $away_team_games)
         ];
 
         //calculate how many games each team has been involved in of the total score..
@@ -107,6 +111,40 @@ class CollectionExample
     private function distanceInDays($date1, $date2) {
         return (strtotime($date2) - strtotime($date1))/60/60/24;
     }
+
+    private function generateStats($home_team_games, $away_team_games) {
+        $arr = [
+            'over_zero' => ['h' => 0, 'a' => 0, 'avg' => 0],
+            'over_one' => ['h' => 0, 'a' => 0, 'avg' => 0],
+            'over_two' => ['h' => 0, 'a' => 0, 'avg' => 0],
+            'over_three' => ['h' => 0, 'a' => 0, 'avg' => 0],
+            'btts' => ['h' => 0, 'a' => 0, 'avg' => 0]
+        ];
+
+        for($i = 0; $i < count($home_team_games); $i++) {
+            $hs = $home_team_games[$i]['score'][0];
+            $hc = $home_team_games[$i]['score'][1];
+            if($hs > 0 && $hc > 0) { $arr['btts']['h']++; }
+
+            if($hs + $hc >= 4) { $arr['over_three']['h']++; }
+            if($hs + $hc >= 3) { $arr['over_two']['h']++; }
+            if($hs + $hc >= 2) { $arr['over_one']['h']++; }
+            if($hs + $hc >= 1) { $arr['over_zero']['h']++; }
+        }
+        for($i = 0; $i < count($away_team_games); $i++) {
+            $as = $away_team_games[$i]['score'][0];
+            $ac = $away_team_games[$i]['score'][1];
+            if($as > 0 && $ac > 0) { $arr['btts']['a']++; }
+
+            if($as + $ac >= 4) { $arr['over_three']['a']++; }
+            if($as + $ac >= 3) { $arr['over_two']['a']++; }
+            if($as + $ac >= 2) { $arr['over_one']['a']++; }
+            if($as + $ac >= 1) { $arr['over_zero']['a']++; }
+        }
+
+        return $arr;
+    }
+
 
     private function generateRandomNumberArray($numCount, $length, $offset = 0) {
         if($numCount <= 0 || $offset < 0 || $length <= 0) {
