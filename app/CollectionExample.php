@@ -15,6 +15,9 @@ class CollectionExample
 //        $schedule = $this->scheduler($data);
 //        return $schedule;
 
+        $home_team_name = "Millwall";
+        $away_team_name = "Nottingham Forest";
+
         $home_team_games = [
             ['score' => [1,0], 'date' => "2019-08-03"],
             ['score' => [1,0], 'date' => "2019-08-17"],
@@ -51,7 +54,6 @@ class CollectionExample
             //distance from fixture date to first game date
             $d = $this->distanceInDays($home_team_games[0]['date'], $date_of_fixture);
             $x = $d - $this->distanceInDays($home_team_games[$i]['date'], $date_of_fixture);
-            
             $weight = $this->calcDistance($x,$d);
             $arr['hs'][] = $home_team_games[$i]['score'][0] * $weight;
             $arr['hc'][] = $home_team_games[$i]['score'][1] * $weight;
@@ -114,33 +116,75 @@ class CollectionExample
 
     private function generateStats($home_team_games, $away_team_games) {
         $arr = [
-            'over_zero' => ['h' => 0, 'a' => 0, 'avg' => 0],
-            'over_one' => ['h' => 0, 'a' => 0, 'avg' => 0],
-            'over_two' => ['h' => 0, 'a' => 0, 'avg' => 0],
-            'over_three' => ['h' => 0, 'a' => 0, 'avg' => 0],
-            'btts' => ['h' => 0, 'a' => 0, 'avg' => 0]
+            'overall' => [
+                'over_zero' => ['h' => 0, 'a' => 0, 'avg' => 0],
+                'over_one' => ['h' => 0, 'a' => 0, 'avg' => 0],
+                'over_two' => ['h' => 0, 'a' => 0, 'avg' => 0],
+                'over_three' => ['h' => 0, 'a' => 0, 'avg' => 0],
+                'btts' => ['h' => 0, 'a' => 0, 'avg' => 0]
+            ],
+            'home' => [
+                'over_zero' => ['h' => 0, 'a' => 0],
+                'over_one' => ['h' => 0, 'a' => 0],
+                'over_two' => ['h' => 0, 'a' => 0],
+                'over_three' => ['h' => 0, 'a' => 0]
+            ],
+            'away' => [
+                'over_zero' => ['h' => 0, 'a' => 0],
+                'over_one' => ['h' => 0, 'a' => 0],
+                'over_two' => ['h' => 0, 'a' => 0],
+                'over_three' => ['h' => 0, 'a' => 0]
+            ]
         ];
 
         for($i = 0; $i < count($home_team_games); $i++) {
             $hs = $home_team_games[$i]['score'][0];
             $hc = $home_team_games[$i]['score'][1];
-            if($hs > 0 && $hc > 0) { $arr['btts']['h']++; }
 
-            if($hs + $hc >= 4) { $arr['over_three']['h']++; }
-            if($hs + $hc >= 3) { $arr['over_two']['h']++; }
-            if($hs + $hc >= 2) { $arr['over_one']['h']++; }
-            if($hs + $hc >= 1) { $arr['over_zero']['h']++; }
+            $arr['overall']['btts']['h'] += ($hs > 0 && $hc > 0) ? 1 : 0;
+            $arr['overall']['over_three']['h'] += ($hs + $hc >= 4) ? 1 : 0;
+            $arr['overall']['over_two']['h'] += ($hs + $hc >= 3) ? 1 : 0;
+            $arr['overall']['over_one']['h'] += ($hs + $hc >= 2) ? 1 : 0;
+            $arr['overall']['over_zero']['h'] += ($hs + $hc >= 1) ? 1 : 0;
+
+            //check individual stats...
+            $arr['home']['over_three']['h'] += ($hs >= 4) ? 1 : 0;
+            $arr['home']['over_two']['h'] += ($hs >= 3) ? 1 : 0;
+            $arr['home']['over_one']['h'] += ($hs >= 2) ? 1 : 0;
+            $arr['home']['over_zero']['h'] += ($hs >= 1) ? 1 : 0;
+
+            $arr['home']['over_three']['a'] += ($hc >= 4) ? 1 : 0;
+            $arr['home']['over_two']['a'] += ($hc >= 3) ? 1 : 0;
+            $arr['home']['over_one']['a'] += ($hc >= 2) ? 1 : 0;
+            $arr['home']['over_zero']['a'] += ($hc >= 1) ? 1 : 0;
         }
         for($i = 0; $i < count($away_team_games); $i++) {
-            $as = $away_team_games[$i]['score'][0];
-            $ac = $away_team_games[$i]['score'][1];
-            if($as > 0 && $ac > 0) { $arr['btts']['a']++; }
+            $as = $away_team_games[$i]['score'][1];
+            $ac = $away_team_games[$i]['score'][0];
 
-            if($as + $ac >= 4) { $arr['over_three']['a']++; }
-            if($as + $ac >= 3) { $arr['over_two']['a']++; }
-            if($as + $ac >= 2) { $arr['over_one']['a']++; }
-            if($as + $ac >= 1) { $arr['over_zero']['a']++; }
+            $arr['overall']['btts']['a'] += ($as > 0 && $ac > 0) ? 1 : 0;
+            $arr['overall']['over_three']['a'] += ($as + $ac >= 4) ? 1 : 0;
+            $arr['overall']['over_two']['a'] += ($as + $ac >= 3) ? 1 : 0;
+            $arr['overall']['over_one']['a'] += ($as + $ac >= 2) ? 1 : 0;
+            $arr['overall']['over_zero']['a'] += ($as + $ac >= 1) ? 1 : 0;
+
+            //check individual stats...
+            $arr['away']['over_three']['a'] += ($as >= 4) ? 1 : 0;
+            $arr['away']['over_two']['a'] += ($as >= 3) ? 1 : 0;
+            $arr['away']['over_one']['a'] += ($as >= 2) ? 1 : 0;
+            $arr['away']['over_zero']['a'] += ($as >= 1) ? 1 : 0;
+
+            $arr['away']['over_three']['h'] += ($ac >= 4) ? 1 : 0;
+            $arr['away']['over_two']['h'] += ($ac >= 3) ? 1 : 0;
+            $arr['away']['over_one']['h'] += ($ac >= 2) ? 1 : 0;
+            $arr['away']['over_zero']['h'] += ($ac >= 1) ? 1 : 0;
         }
+
+        $arr['overall']['btts']['avg'] = ($arr['overall']['btts']['h'] + $arr['overall']['btts']['a']) / 2;
+        $arr['overall']['over_three']['avg'] = ($arr['overall']['over_three']['h'] + $arr['overall']['over_three']['a']) / 2;
+        $arr['overall']['over_two']['avg'] = ($arr['overall']['over_two']['h'] + $arr['overall']['over_two']['a']) / 2;
+        $arr['overall']['over_one']['avg'] =  ($arr['overall']['over_one']['h'] + $arr['overall']['over_one']['a']) / 2;
+        $arr['overall']['over_zero']['avg'] = ($arr['overall']['over_zero']['h'] + $arr['overall']['over_zero']['a']) / 2;
 
         return $arr;
     }
